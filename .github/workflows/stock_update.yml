@@ -1,0 +1,40 @@
+name: Fetch Hourly Stock Data
+
+on:
+  workflow_dispatch: # Allows you to run it manually
+  schedule:
+    # Runs "at minute 0 past every hour" (e.g., 1:00, 2:00, 3:00)
+    - cron: '0 * * * *'
+
+jobs:
+  fetch-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checks out your repository's code
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      # 2. Sets up a Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # 3. Installs the required libraries
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Runs your Python script to fetch data
+      - name: Run data fetch script
+        run: python fetch_stock_data.py 
+
+      # 5. Commits the new/updated data file back to your repo
+      - name: Commit and push data
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "BOT: Updated stock data"
+          # IMPORTANT: Make sure this matches your script's OUTPUT_CSV variable
+          file_pattern: stock_snapshot_data.csv 
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+          commit_author: "GitHub Actions Bot <actions@github.com>"
